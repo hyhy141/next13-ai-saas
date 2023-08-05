@@ -11,9 +11,7 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-export async function POST(
-  req: Request
-) {
+export async function POST(req: Request) {
   try {
     const { userId } = auth();
     const body = await req.json();
@@ -24,26 +22,29 @@ export async function POST(
     }
 
     if (!configuration.apiKey) {
-      return new NextResponse("OpenAI API Key not configured.", { status: 500 });
+      return new NextResponse("Key not configured.", { status: 500 });
     }
 
     if (!prompt) {
-      return new NextResponse("Prompt is required", { status: 400 });
+      return new NextResponse("Je vyžadován pokyn", { status: 400 });
     }
 
     if (!amount) {
-      return new NextResponse("Amount is required", { status: 400 });
+      return new NextResponse("Vyžaduje se počet fotek", { status: 400 });
     }
 
     if (!resolution) {
-      return new NextResponse("Resolution is required", { status: 400 });
+      return new NextResponse("Vyžaduje se rozlišení", { status: 400 });
     }
 
     const freeTrial = await checkApiLimit();
     const isPro = await checkSubscription();
 
     if (!freeTrial && !isPro) {
-      return new NextResponse("Free trial has expired. Please upgrade to pro.", { status: 403 });
+      return new NextResponse(
+        "Zkušební verze vypršela. Přejděte na verzi pro.",
+        { status: 403 }
+      );
     }
 
     const response = await openai.createImage({
@@ -58,7 +59,7 @@ export async function POST(
 
     return NextResponse.json(response.data.data);
   } catch (error) {
-    console.log('[IMAGE_ERROR]', error);
+    console.log("[IMAGE_ERROR]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-};
+}
